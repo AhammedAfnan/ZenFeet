@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+    <style>
+        .erro {
+            color: red;
+            text-align: center;
+        }
+    </style>
+    <form action="/register" class="signup-form" method="post">
+        <h2 class="title">Signup</h2>
+        <div class="names">
+            <div>
+                <input type="text" placeholder="Firstname" name="fname" id="fname">
+                <small id="fnameErr" class="error"></small>
+            </div>
+            <div>
+                <input type="text" placeholder="Lastname" name="lname" id="lname">
+                <small id="lnameErr" class="error"></small>
+            </div>
+        </div>
+        <input type="email" placeholder="Email" name="email" id="email">
+        <small id="emailErr" class="error"></small>
+        <input type="number" placeholder="Mobile no." name="mobile" id="mobile">
+        <small id="mobileErr" class="error"></small>
+        <input type="password" placeholder="Password" name="password" id="password">
+        <small id="passwordErr" class="error"></small>
+        <input type="password" placeholder="Confirm Password" name="cpassword" id="cpassword">
+        <small id="cpasswordErr" class="error"></small>
+        <div>
+            <button type="submit" class="btn" onclick="return validateSignup(event)">Sign Up</button>
+            <span><p class="erro"> <%= locals.message !== null ? locals.message : '' %> </p></span>
+            <p class="already">Already have an account?<a href="/login">Login</a></p>
+        </div>
+    </form>
+    <script src="/validations/signupValidation.js"></script>
+</body>
+</html>
