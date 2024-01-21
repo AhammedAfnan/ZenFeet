@@ -1,4 +1,6 @@
-const User = require("../model/userModel")
+const User = require("../model/userModel");
+const { sendVerifyMail } = require("../services/nodemailer");
+const {getOTP,securePassword} = require("../helpers/generator")
 
 
 const loadHome = (req,res,next) => {
@@ -25,21 +27,73 @@ const saveRegister_loadLogin = async (req,res,next) => {
         if (userData) {
             return res.render("register", {message:'User already Exists'})   // what if eede return kodthillang.....what if retur kodtheng...
         }
-        else {
-            let newUserData = new User ({
+        
+        const OTP = req.session.OTP = getOTP()
+        console.log(OTP);
+
+        sendVerifyMail(email,OTP)
+        res.render("otpValidation", {
+            fname,
+            lname,
+            email,
+            mobile,
+            password,
+            message:null,
+        })
+    } else {
+        res.render("register",{message:'Password is not matching'})    // idanne frontend validation l cheythittee.....appo ad override aana ??
+     }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const validateOTP = async(req,res,next) => {
+    try {
+        const {fname,lname,email,mobile,password} = req.body;
+
+        const userOTP = req.body.OTP;
+
+        if (userOTP==req.session.OTP) {
+            const sPassword = await securePassword(password)
+
+            let newUserData;
+
+            newUserData = await new User({
                 fname,
                 lname,
                 email,
                 mobile,
-                password
-            })
+                password:sPassword,
+            }).save()
 
-            await newUserData.save()
+            req.session.userId = newUserData._id;
+            req.session.OTP = null
+            res.redirect('/')
+        }else{
+            // incorrect OTP
+            
+            if (req.session.OTP){
+                console.log("incorrect OTP");
+                res.render('otpValidation',{
+                    fname,
+                    lname,
+                    email,
+                    mobile,
+                    password,
+                    message:"Incorrect OTP"
+                })
+            }else{
+                res.render('otpValidation',{
+                    fname,
+                    lname,
+                    email,
+                    mobile,
+                    password,
+                    message:"OTP expired"
+                })
+            }
         }
-        res.render("otpValidation")
-    }else {
-        res.render("register",{message:'Password is not matching'})    // idanne frontend validation l cheythittee.....appo ad override aana ??
-    }
     } catch (error) {
         console.log(error);
     }
@@ -69,4 +123,6 @@ const loadProductDetail = (req,res,next) => {
     }
 }
 
-module.exports = {loadRegister,loadLogin,loadHome,loadShop,loadProductDetail,saveRegister_loadLogin};
+
+
+module.exports = {loadRegister,loadLogin,loadHome,loadShop,loadProductDetail,saveRegister_loadLogin,validateOTP};
